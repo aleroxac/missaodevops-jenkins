@@ -1,0 +1,19 @@
+import javaposse.jobdsl.plugin.*
+
+node("slave-basic") {
+    stage('os') {
+        sh 'cat /etc/os-release'
+    }
+
+    stage('pwd') {
+        sh 'pwd'
+    }
+
+    stage('files') {
+        sh 'ls -l'
+    }
+
+    stage('ip') {
+        sh 'hostname -i'
+    }
+}
