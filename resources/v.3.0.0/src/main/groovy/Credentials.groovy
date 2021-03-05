@@ -2,13 +2,17 @@ import java.lang.System
 import jenkins.*
 import hudson.model.*
 import jenkins.model.*
-// Plugins for SSH credentials
-import com.cloudbees.plugins.credentials.*
-import com.cloudbees.plugins.credentials.common.*
-import com.cloudbees.plugins.credentials.domains.*
-import com.cloudbees.plugins.credentials.impl.*
-import com.cloudbees.jenkins.plugins.sshcredentials.impl.*
+
+import static com.cloudbees.plugins.credentials.CredentialsScope.GLOBAL
 import hudson.plugins.sshslaves.*
+import hudson.util.Secret
+import com.cloudbees.jenkins.plugins.sshcredentials.impl.*
+import com.cloudbees.plugins.credentials.domains.Domain
+import com.cloudbees.plugins.credentials.SystemCredentialsProvider
+import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl
+import com.cloudbees.plugins.credentials.CredentialsStore
+import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl
+import org.jenkinsci.plugins.plaincredentials.*
 
 // Read properties
 def home_dir = System.getenv("JENKINS_HOME")
@@ -27,7 +31,7 @@ properties.credentials.each {
     case "ssh":
       println ">>> Create ssh credentials for user ${it.value.userId} with SSH private key ${it.value.path}"
       creds = new BasicSSHUserPrivateKey(
-        CredentialsScope.GLOBAL,
+        GLOBAL,
         it.value.credentialsId,
         it.value.userId,
         new BasicSSHUserPrivateKey.FileOnMasterPrivateKeySource(it.value.path),
@@ -39,7 +43,7 @@ properties.credentials.each {
     case "password":
       println ">>> Create credentials for user ${it.value.userId} with the password from ${it.value.path}"
       creds = new UsernamePasswordCredentialsImpl(
-        CredentialsScope.GLOBAL,
+        GLOBAL,
         it.value.credentialsId,
         it.value.description,
         it.value.userId,
@@ -47,14 +51,14 @@ properties.credentials.each {
       )
       credentials_store.addCredentials(global_domain, creds)
       break
-    case "secret_text":
+    case "string":
       println ">>> Create credentials for kubernetes cluster with service-account key"
       def k8s_key = System.getenv("K8S_KEY")
       creds = new StringCredentialsImpl(
-        CredentialsScope.GLOBAL,
+        GLOBAL,
         it.value.id,
         it.value.description,
-        k8s_key
+        Secret.fromString(k8s_key)
       )
       credentials_store.addCredentials(global_domain, creds)
       break
@@ -63,4 +67,3 @@ properties.credentials.each {
       break
   }
 }
-

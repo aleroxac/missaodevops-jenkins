@@ -13,13 +13,9 @@ if( ! System.getenv().containsKey('KUBERNETES_SERVER_URL') ) {
 
 def jenkins = Jenkins.getInstanceOrNull()
 def cloudList = jenkins.clouds
-
 def home_dir = System.getenv("JENKINS_HOME")
 def properties = new ConfigSlurper().parse(new File("$home_dir/config/clouds.properties").toURI().toURL())
 
-// KUBERNETES CLOUD (URLs)
-//     > POD TEMPLATE [List] (Namespace, Label)
-//         > CONTAINER TEMPLATE [List] (Docker Image, Docker args)
 
 properties.kubernetes.each { cloudKubernetes ->
     println ">>> Kubernetes Cloud Setting up: " + cloudKubernetes.value.get('name')

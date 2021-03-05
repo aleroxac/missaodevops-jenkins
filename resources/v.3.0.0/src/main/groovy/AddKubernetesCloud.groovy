@@ -16,6 +16,31 @@ def cloudList = jenkins.clouds
 def home_dir = System.getenv("JENKINS_HOME")
 def properties = new ConfigSlurper().parse(new File("$home_dir/config/clouds.properties").toURI().toURL())
 
+
+properties.kubernetes.each { cloudKubernetes ->
+    println ">>> Kubernetes Cloud Setting up: " + cloudKubernetes.value.get('name')
+
+    List<PodTemplate> podTemplateList = new ArrayList<PodTemplate>()
+    cloudKubernetes.value.get('pods').each { podTemplate ->
+        println ">>>>>> POD Template setup: " + podTemplate.value.get('name')
+        def newPodTemplate = createBasicPODTemplate(podTemplate)
+
+        List<ContainerTemplate> containerTemplateList = new ArrayList<ContainerTemplate>()
+        podTemplate.value.get('containers').each { containerTemplate ->
+            println ">>>>>>>>> Container Template setup: " + containerTemplate.value.get('name')
+            containerTemplateList.add( createBasicContainerTemplate(containerTemplate) )
+        }
+
+        newPodTemplate.setContainers(containerTemplateList)
+        podTemplateList.add(newPodTemplate)
+    }
+    def kubernetesCloud = createKubernetesCloud(cloudKubernetes, podTemplateList)
+    cloudList.add(kubernetesCloud)
+}
+jenkins.save()
+println("Clouds Adicionadas: " + Jenkins.getInstanceOrNull().clouds.size())
+
+
 def createKubernetesCloud(cloudKubernetes, podTemplateList) {
     def serverUrl = System.getenv("KUBERNETES_SERVER_URL")
     def jenkinsUrl = System.getenv("JENKINS_SERVER_URL")
@@ -50,31 +75,8 @@ def createBasicContainerTemplate(containerTemplate) {
             containerTemplate.value.get('name'),
             containerTemplate.value.get('image'),
             containerTemplate.value.get('command'),
-            containerTemplate.value.get('args'))
+            containerTemplate.value.get('args')
+    )
     basicContainerTemplate.setTtyEnabled(containerTemplate.value.get('ttyEnabled', true))
     return basicContainerTemplate;
 }
-
-
-properties.kubernetes.each { cloudKubernetes ->
-    println ">>> Kubernetes Cloud Setting up: " + cloudKubernetes.value.get('name')
-
-    List<PodTemplate> podTemplateList = new ArrayList<PodTemplate>()
-    cloudKubernetes.value.get('pods').each { podTemplate ->
-        println ">>>>>> POD Template setup: " + podTemplate.value.get('name')
-        def newPodTemplate = createBasicPODTemplate(podTemplate)
-
-        List<ContainerTemplate> containerTemplateList = new ArrayList<ContainerTemplate>()
-        podTemplate.value.get('containers').each { containerTemplate ->
-            println ">>>>>>>>> Container Template setup: " + containerTemplate.value.get('name')
-            containerTemplateList.add( createBasicContainerTemplate(containerTemplate) )
-        }
-
-        newPodTemplate.setContainers(containerTemplateList)
-        podTemplateList.add(newPodTemplate)
-    }
-    def kubernetesCloud = createKubernetesCloud(cloudKubernetes, podTemplateList)
-    cloudList.add(kubernetesCloud)
-}
-jenkins.save()
-println("Clouds Adicionadas: " + Jenkins.getInstanceOrNull().clouds.size())

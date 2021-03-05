@@ -32,6 +32,9 @@ kubectl create rolebinding jenkins-admin-binding --clusterrole=admin --serviceac
 K8S_KEY=$(kubectl get secret $(kubectl describe sa jenkins -n jenkins | grep Token | awk '{print $2}') -o jsonpath='{.data.token}' -n jenkins)
 
 # ---------- BUILDING THE CONTAINER IMAGE ----------
+[ ! -d m2deps ] && mkdir m2deps
+[ -d jobs ] && rm -rf jobs || mkdir jobs
+
 docker build \
     -t "${dockerhub_user}/${image_name}:${image_version}" \
     --build-arg KUBERNETES_SERVER_URL="${KUBERNETES_SERVER_URL}" \
@@ -42,9 +45,6 @@ docker build \
 
 
 # ---------- RUNNING THE CONTAINER ----------
-[ ! -d m2deps ] && mkdir m2deps
-[ -d jobs ] && rm -rf jobs || mkdir jobs
-
 docker run -p ${jenkins_port}:8080 \
     -e KUBERNETES_SERVER_URL="$(kubectl config view -o json | jq -r '.clusters[-1]["cluster"]["server"]')" \
     -e JENKINS_SERVER_URL="localhost:8080" \
