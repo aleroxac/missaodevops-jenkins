@@ -21,15 +21,15 @@ def properties = new ConfigSlurper().parse(new File("$home_dir/config/credential
 global_domain = Domain.global()
 credentials_store = Jenkins.instance.getExtensionList('com.cloudbees.plugins.credentials.SystemCredentialsProvider')[0].getStore()
 
-println "############################ STARTING CREDENTIALS CONFIG ############################"
+println "\n############################ STARTING CREDENTIALS CONFIG ############################"
 
 properties.credentials.each {
-  if (! new File(it.value.path).exists()) {
-    throw new FileNotFoundException("${it.value.path} doesn't exists! Check credentials configuration")
-  }
   switch (it.value.type) {
     case "ssh":
-      println ">>> Create ssh credentials for user ${it.value.userId} with SSH private key ${it.value.path}"
+      if (! new File(it.value.path).exists()) {
+        throw new FileNotFoundException("${it.value.path} doesn't exists! Check credentials configuration")
+      }
+      println ">>> Create credentials for user ${it.value.userId} by SSH private key ${it.value.path}"
       creds = new BasicSSHUserPrivateKey(
         GLOBAL,
         it.value.credentialsId,
@@ -41,7 +41,10 @@ properties.credentials.each {
       credentials_store.addCredentials(global_domain, creds)
       break
     case "password":
-      println ">>> Create credentials for user ${it.value.userId} with the password from ${it.value.path}"
+      if (! new File(it.value.path).exists()) {
+        throw new FileNotFoundException("${it.value.path} doesn't exists! Check credentials configuration")
+      }
+      println ">>> Create credentials for user ${it.value.userId} by password from ${it.value.path}"
       creds = new UsernamePasswordCredentialsImpl(
         GLOBAL,
         it.value.credentialsId,
@@ -52,8 +55,8 @@ properties.credentials.each {
       credentials_store.addCredentials(global_domain, creds)
       break
     case "string":
-      println ">>> Create credentials for kubernetes cluster with service-account key"
       def k8s_key = System.getenv("K8S_KEY")
+      println ">>> Create credentials for serviceaccount key kubernetes cluster by K8S_KEY environment variable"
       creds = new StringCredentialsImpl(
         GLOBAL,
         it.value.id,

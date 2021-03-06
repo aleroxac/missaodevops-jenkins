@@ -9,7 +9,7 @@ def List<JDK> installations = []
 def home_dir = System.getenv("JENKINS_HOME")
 def properties = new ConfigSlurper().parse(new File("$home_dir/config/tools.properties").toURI().toURL())
 
-println "############################ STARTING JDKs CONFIG ############################"
+println "\n############################ STARTING JDKs CONFIG ############################"
 
 properties.jdk.each { javaTool ->
     if(javaTool.value.enabled) {

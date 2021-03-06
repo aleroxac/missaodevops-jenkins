@@ -12,7 +12,7 @@ def helpers = shell.parse(new File("$home_dir/init.groovy.d/Helpers.groovy"))
 def properties = new ConfigSlurper().parse(new File("$home_dir/config/initial-jobs.properties").toURI().toURL())
 def instance = Jenkins.getInstanceOrNull()
 
-println "############################ STARTING INITIAL JOBS SETUP ############################"
+println "\n############################ STARTING INITIAL JOBS SETUP ############################"
 
 properties.initialjobs.each { jobProperties ->
   def oldJob = instance.getJob(jobProperties.value.get('name'))

@@ -46,20 +46,19 @@ def createKubernetesCloud(cloudKubernetes, podTemplateList) {
     def jenkinsUrl = System.getenv("JENKINS_SERVER_URL")
     def kubernetesCloud = new KubernetesCloud(
             cloudKubernetes.value.get('name'),
-            null,
             serverUrl,
+            cloudKubernetes.value.get('skipTlsVerify'),
             cloudKubernetes.value.get('namespace'),
+            cloudKubernetes.value.get('credentialsId'),
             jenkinsUrl,
-            cloudKubernetes.value.get('idleMinutes'),
-            cloudKubernetes.value.get('readTimeout'),
             cloudKubernetes.value.get('connectTimeout'),
-            cloudKubernetes.value.get('slaveConnectTimeout')
+            cloudKubernetes.value.get('readTimeout'),
+            cloudKubernetes.value.get('containerCapStr'),
+            cloudKubernetes.value.get('maxRequestsPerHostStr'),
+            cloudKubernetes.value.get('slaveConnectTimeout'),
+            cloudKubernetes.value.get('idleMinutes'),
             podTemplateList
     )
-    kubernetesCloud.setSkipTlsVerify(cloudKubernetes.value.get('skipTlsVerify', true))
-    kubernetesCloud.value.get('credentialsId'),
-    kubernetesCloud.value.get('containerCapStr'),
-    kubernetesCloud.value.get('maxRequestsPerHostStr'),
     return kubernetesCloud
 }
 

@@ -8,7 +8,7 @@ image_version=3.0.0
 container_name=jenkins
 KUBERNETES_SERVER_URL="$(kubectl config view -o json | jq -r '.clusters[-1]["cluster"]["server"]')"
 # JENKINS_SERVER_URL="$(docker inspect jenkins -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}'):8080" 
-JENKINS_SERVER_URL="http://172.17.0.3:8080"
+JENKINS_SERVER_URL="http://localhost:8080"
 
 
 # ---------- SETTING BUILD WORKSPACE ----------
@@ -24,16 +24,12 @@ docker rm -f ${container_name}
 
 
 # ---------- SETTING K8S ----------
-minikube node list | grep "172" > /dev/null || minikube start
-kubectx minikube
-kubectl create namespace jenkins
-kubectl create sa jenkins -n jenkins
-kubectl create rolebinding jenkins-admin-binding --clusterrole=admin --serviceaccount=jenkins:jenkins -n jenkins
-K8S_KEY=$(kubectl get secret $(kubectl describe sa jenkins -n jenkins | grep Token | awk '{print $2}') -o jsonpath='{.data.token}' -n jenkins)
+minikube ip | grep "172" > /dev/null || minikube start
+K8S_KEY=$(kubectl get secret $(kubectl describe sa jenkins -n jenkins | grep Token | awk '{print $2}') -o jsonpath='{.data.token}' -n jenkins | base64 --decode -)
 
 # ---------- BUILDING THE CONTAINER IMAGE ----------
-[ ! -d m2deps ] && mkdir m2deps
-[ -d jobs ] && rm -rf jobs || mkdir jobs
+[ -d m2deps ] && rm -rf m2deps || mkdir m2deps
+[ -d jobs ] && sudo rm -rf jobs || mkdir jobs
 
 docker build \
     -t "${dockerhub_user}/${image_name}:${image_version}" \
@@ -45,9 +41,9 @@ docker build \
 
 
 # ---------- RUNNING THE CONTAINER ----------
-docker run -p ${jenkins_port}:8080 \
-    -e KUBERNETES_SERVER_URL="$(kubectl config view -o json | jq -r '.clusters[-1]["cluster"]["server"]')" \
-    -e JENKINS_SERVER_URL="localhost:8080" \
+docker run -p ${jenkins_port}:${jenkins_port} \
+    -e KUBERNETES_SERVER_URL="${KUBERNETES_SERVER_URL}" \
+    -e JENKINS_SERVER_URL="${JENKINS_SERVER_URL}" \
     -v "${PWD}/jobs:/var/jenkins_home/jobs/" \
     -v "${PWD}/m2deps:/var/jenkins_home/.m2/repository/" \
     -v "${HOME}/.ssh:/var/jenkins_home/.ssh/" \

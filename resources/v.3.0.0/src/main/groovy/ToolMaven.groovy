@@ -7,7 +7,7 @@ import hudson.tools.ZipExtractionInstaller
 import hudson.util.DescribableList
 import jenkins.model.Jenkins
 
-println "############################ STARTING MAVEN CONFIG ############################"
+println "\n############################ STARTING MAVEN CONFIG ############################"
 def home_dir = System.getenv("JENKINS_HOME")
 def properties = new ConfigSlurper().parse(new File("$home_dir/config/tools.properties").toURI().toURL())
 

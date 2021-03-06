@@ -9,7 +9,7 @@ GroovyShell shell = new GroovyShell()
 def helpers = shell.parse(new File("$home_dir/init.groovy.d/Helpers.groovy"))
 def properties = new ConfigSlurper().parse(new File("$home_dir/config/globals.properties").toURI().toURL())
 
-println "############################ STARTING GLOBAL SETUP ############################"
+println "\n############################ STARTING GLOBAL SETUP ############################"
 
 println ">>> set number of executors on master to ${properties.global.numExecutorsOnMaster}"
 Jenkins.instance.setNumExecutors(properties.global.numExecutorsOnMaster)

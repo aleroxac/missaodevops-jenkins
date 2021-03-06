@@ -7,10 +7,10 @@ ARG JENKINS_SERVER_URL
 ARG K8S_KEY
 ARG MASTER_IMAGE_VERSION="v.3.0.0"
 
-ENV master_image_version = ${MASTER_IMAGE_VERSION}
-ENV KUBERNETES_SERVER_URL = ${KUBERNETES_SERVER_URL}
-ENV JENKINS_SERVER_URL = ${JENKINS_SERVER_URL}
-ENV K8S_KEY = ${K8S_KEY}
+ENV master_image_version ${MASTER_IMAGE_VERSION}
+ENV KUBERNETES_SERVER_URL ${KUBERNETES_SERVER_URL}
+ENV JENKINS_SERVER_URL ${JENKINS_SERVER_URL}
+ENV K8S_KEY ${K8S_KEY}
 
 USER root
 # RUN chown -R jenkins:jenkins /var/jenkins_home
@@ -24,7 +24,7 @@ RUN echo 2.112 > /usr/share/jenkins/ref/jenkins.install.UpgradeWizard.state \
 
 RUN /usr/local/bin/install-plugins.sh < /usr/share/jenkins/ref/plugins.list
 
-COPY src/main/groovy/* /usr/share/jenkins/ref/init.groovy.d/
+COPY src/main/groovy/*.groovy /usr/share/jenkins/ref/init.groovy.d/
 COPY src/main/resources/*.properties /var/jenkins_home/config/
 COPY src/main/resources/initials/*.file /var/jenkins_home/config/initials/
 
