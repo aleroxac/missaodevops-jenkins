@@ -6,16 +6,16 @@ import org.csanchez.jenkins.plugins.kubernetes.PodTemplate
 println "\n############################ KUBERNETES CLOUDs SETUP ############################"
 
 if( ! System.getenv().containsKey('KUBERNETES_SERVER_URL') ) {
-    println(">>> ENV VAR 'KUBERNETES_SERVER_URL' not found")
+    println(">>> Evironment Variable 'KUBERNETES_SERVER_URL' not found")
     println(">>> Please set them before start Jenkins")
     return
 }
 
 def jenkins = Jenkins.getInstanceOrNull()
 def cloudList = jenkins.clouds
+
 def home_dir = System.getenv("JENKINS_HOME")
 def properties = new ConfigSlurper().parse(new File("$home_dir/config/clouds.properties").toURI().toURL())
-
 
 properties.kubernetes.each { cloudKubernetes ->
     println ">>> Kubernetes Cloud Setting up: " + cloudKubernetes.value.get('name')
@@ -35,7 +35,7 @@ properties.kubernetes.each { cloudKubernetes ->
         podTemplateList.add(newPodTemplate)
     }
     def kubernetesCloud = createKubernetesCloud(cloudKubernetes, podTemplateList)
-    cloudList.add(kubernetesCloud)
+    cloudList.replace(kubernetesCloud)
 }
 jenkins.save()
 println("Clouds Adicionadas: " + Jenkins.getInstanceOrNull().clouds.size())
@@ -46,29 +46,32 @@ def createKubernetesCloud(cloudKubernetes, podTemplateList) {
     def jenkinsUrl = System.getenv("JENKINS_SERVER_URL")
     def kubernetesCloud = new KubernetesCloud(
             cloudKubernetes.value.get('name'),
-            null,
+            podTemplateList,
             serverUrl,
             cloudKubernetes.value.get('namespace'),
             jenkinsUrl,
-            cloudKubernetes.value.get('idleMinutes'),
+            cloudKubernetes.value.get('containerCapStr'),
+            cloudKubernetes.value.get('connectionTimeout'),
             cloudKubernetes.value.get('readTimeout'),
-            cloudKubernetes.value.get('connectTimeout'),
-            cloudKubernetes.value.get('slaveConnectTimeout')
-            podTemplateList
+            cloudKubernetes.value.get('retentionTimeout')
     )
     kubernetesCloud.setSkipTlsVerify(cloudKubernetes.value.get('skipTlsVerify', true))
-    kubernetesCloud.value.get('credentialsId'),
-    kubernetesCloud.value.get('containerCapStr'),
-    kubernetesCloud.value.get('maxRequestsPerHostStr'),
-    return kubernetesCloud
+    kubernetesCloud.setCredentialsId(cloudKubernetes.value.get('credentialsId'))
+    kubernetesCloud.setWaitForPodSec(cloudKubernetes.value.get('waitForPodSec'))
+    kubernetesCloud.setMaxRequestsPerHost(cloudKubernetes.value.get('maxRequestsPerHost'))
+    kubernetesCloud.setLabels("jenkins":"worker")
+    return kubernetesCloud;
 }
 
 def createBasicPODTemplate(podTemplate) {
-    PodTemplate defaultPod = new PodTemplate()
-    defaultPod.setName(podTemplate.value.get('name'))
-    defaultPod.setNamespace(podTemplate.value.get('namespace'))
-    defaultPod.setLabel(podTemplate.value.get('label'))
-    return defaultPod
+    PodTemplate basicPodTemplate = new PodTemplate()
+    basicPodTemplate.setName(podTemplate.value.get('name'))
+    basicPodTemplate.setNamespace(podTemplate.value.get('namespace'))
+    basicPodTemplate.setLabel(podTemplate.value.get('label'))
+    basicPodTemplate.setSlaveConnectTimeout(podTemplate.value.get('slaveConnectTimeout'))
+    basicPodTemplate.setInstanceCapStr(podTemplate.value.get('instanceCapStr'))
+    basicPodTemplate.setIdleMinutesStr(podTemplate.value.get('idleMinutesStr'))
+    return basicPodTemplate;
 }
 
 def createBasicContainerTemplate(containerTemplate) {
@@ -79,5 +82,6 @@ def createBasicContainerTemplate(containerTemplate) {
             containerTemplate.value.get('args')
     )
     basicContainerTemplate.setTtyEnabled(containerTemplate.value.get('ttyEnabled', true))
+    basicContainerTemplate.setWorkingDir(containerTemplate.value.get('workingDir'))
     return basicContainerTemplate;
 }
