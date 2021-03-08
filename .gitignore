@@ -1,0 +1,15 @@
+**/.idea
+**/.gradle
+**/.ssh
+**/*.zip
+**/*.rar
+**/*.gz
+**/*.jar
+**/*.ear
+**/*.war
+**/*.class
+**/*.pyc
+**/.out
+**/jobs/
+**/m2deps/
+**/downloads/

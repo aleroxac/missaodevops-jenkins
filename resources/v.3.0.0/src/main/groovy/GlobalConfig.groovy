@@ -23,21 +23,21 @@ Jenkins.instance.setScmCheckoutRetryCount(properties.global.scmCheckoutRetryCoun
 // Change it to the DNS name if you have it
 jlc = JenkinsLocationConfiguration.get()
 if (properties.global.jenkinsRootUrl) {
-  println ">>> set jenkins root url to ${properties.global.jenkinsRootUrl}"
-  jlc.setUrl(properties.global.jenkinsRootUrl)
+    println ">>> set jenkins root url to ${properties.global.jenkinsRootUrl}"
+    jlc.setUrl(properties.global.jenkinsRootUrl)
 } else {
-  def ip = InetAddress.localHost.getHostAddress()
-  println ">>> set jenkins root url to ${ip}"
-  jlc.setUrl("http://$ip:8080")
+    def ip = InetAddress.localHost.getHostAddress()
+    println ">>> set jenkins root url to ${ip}"
+    jlc.setUrl("http://$ip:8080")
 }
 jlc.save()
 
 // Set Admin Email as a string "Name <email>"
 if (properties.global.jenkinsAdminEmail) {
-  def jlc = JenkinsLocationConfiguration.get()
-  println ">>> set admin e-mail address to ${properties.global.jenkinsAdminEmail}"
-  jlc.setAdminAddress(properties.global.jenkinsAdminEmail)
-  jlc.save()
+    def jlc = JenkinsLocationConfiguration.get()
+    println ">>> set admin e-mail address to ${properties.global.jenkinsAdminEmail}"
+    jlc.setAdminAddress(properties.global.jenkinsAdminEmail)
+    jlc.save()
 }
 
 println ">>> Set Global GIT configuration name to ${properties.global.git.name} and email address to ${properties.global.git.email}"
@@ -47,40 +47,41 @@ desc.setGlobalConfigName(properties.global.git.name)
 desc.setGlobalConfigEmail(properties.global.git.email)
 
 if(properties.global.smtp.enabled) {
-  println ">>> Set E-mail Notification"
-  def emailDesc = inst.getDescriptor(hudson.tasks.Mailer)
-  emailDesc.setSmtpHost(properties.global.smtp.host)
-  emailDesc.setSmtpPort(properties.global.smtp.port)
-  emailDesc.setReplyToAddress(properties.global.smtp.reply_to_address)  
-  if(properties.global.smtp.authentication.enabled) {
-    File pwdFile = new File(properties.global.smtp.authentication.passwordFile)
-    if(!pwdFile.exists()) {
-      println "Smpt password file missing!"
-    } else {
-      emailDesc.setSmtpAuth(properties.global.smtp.authentication.login, pwdFile.text.trim())
+    println ">>> Set E-mail Notification"
+    def emailDesc = inst.getDescriptor(hudson.tasks.Mailer)
+    emailDesc.setSmtpHost(properties.global.smtp.host)
+    emailDesc.setSmtpPort(properties.global.smtp.port)
+    emailDesc.setReplyToAddress(properties.global.smtp.reply_to_address)
+
+    if(properties.global.smtp.authentication.enabled) {
+        File pwdFile = new File(properties.global.smtp.authentication.passwordFile)
+        if(!pwdFile.exists()) {
+            println "Smpt password file missing!"
+        } else {
+        emailDesc.setSmtpAuth(properties.global.smtp.authentication.login, pwdFile.text.trim())
+        }
     }
-  }
 }
 
 println ">>> Set system message "
 def env = System.getenv()
 if ( env.containsKey('master_image_version') ) {
-  helpers.addGlobalEnvVariable(Jenkins, 'master_image_version', env['master_image_version'])
-  def date = new Date()
-  sdf = new java.text.SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
-  systemMessage = "Este Jenkins foi configurado e provisionado via código.\n\n" +
-                  "Todas as alterações feitas de forma manual serão perdidas no próximo restart.\n " +
-                  "Alterações devem ser feitas em: ${properties.global.variables.default_repo}\n\n" +
-                  "Build Version: ${env['master_image_version']}\n" +
-                  "Deployment Date: ${sdf.format(date)}\n\n"
-  println "Set system message to:\n ${systemMessage}"
-  Jenkins.instance.setSystemMessage(systemMessage)
+    helpers.addGlobalEnvVariable(Jenkins, 'master_image_version', env['master_image_version'])
+    def date = new Date()
+    sdf = new java.text.SimpleDateFormat("MM/dd/yyyy HH:mm:ss")
+    systemMessage = "Este Jenkins foi configurado e provisionado via código.\n\n" +
+                    "Todas as alterações feitas de forma manual serão perdidas no próximo restart.\n " +
+                    "Alterações devem ser feitas em: ${properties.global.variables.default_repo}\n\n" +
+                    "Build Version: ${env['master_image_version']}\n" +
+                    "Deployment Date: ${sdf.format(date)}\n\n"
+    println "Set system message to:\n ${systemMessage}"
+    Jenkins.instance.setSystemMessage(systemMessage)
 } else {
-  println "Can't set system message - missing env variable master_image_version"
+    println "Can't set system message - missing env variable master_image_version"
 }
 
 println ">>> Set global env variables"
 properties.global.variables.each { key, value ->
-  println "Setting: ${key} = ${value}"
-  helpers.addGlobalEnvVariable(Jenkins, key, value)
+    println "Setting: ${key} = ${value}"
+    helpers.addGlobalEnvVariable(Jenkins, key, value)
 }

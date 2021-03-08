@@ -15,26 +15,26 @@ def instance = Jenkins.getInstanceOrNull()
 println "\n############################ STARTING INITIAL JOBS SETUP ############################"
 
 properties.initialjobs.each { jobProperties ->
-  def oldJob = instance.getJob(jobProperties.value.get('name'))
-  if (oldJob != null) {
-    println ">>> Removendo job antigo: ${jobProperties.value.name}"
-    oldJob.delete()
-  }
-  println ">>> Criando JOB ${jobProperties.value.name}"
+    def oldJob = instance.getJob(jobProperties.value.get('name'))
+    if (oldJob != null) {
+        println ">>> Removendo job antigo: ${jobProperties.value.name}"
+        oldJob.delete()
+    }
+    println ">>> Criando JOB ${jobProperties.value.name}"
 
-  def project = instance.createProject(WorkflowJob.class, jobProperties.value.name)
-  String pipelineScript = new File("$home_dir/config/initials/${jobProperties.value.pipelineFile}").text
+    def project = instance.createProject(WorkflowJob.class, jobProperties.value.name)
+    String pipelineScript = new File("$home_dir/config/initials/${jobProperties.value.pipelineFile}").text
 
-  project.setDefinition(new CpsFlowDefinition(pipelineScript))
-  project.addTrigger(new TimerTrigger("@midnight"))
-  jobProperties.value.parameters.each { key, value ->
-    helpers.addBuildParameter(project, key, value)
-  }
-  project.save()
+    project.setDefinition(new CpsFlowDefinition(pipelineScript))
+    project.addTrigger(new TimerTrigger("@midnight"))
+    jobProperties.value.parameters.each { key, value ->
+        helpers.addBuildParameter(project, key, value)
+    }
+    project.save()
 }
 instance.reload()
 
 properties.initialjobs.each { job ->
-  println ">>> Schedule ${job.value.name} seed jod"
-  instance.getJob(job.value.name).scheduleBuild()
+    println ">>> Schedule ${job.value.name} seed jod"
+    instance.getJob(job.value.name).scheduleBuild()
 }

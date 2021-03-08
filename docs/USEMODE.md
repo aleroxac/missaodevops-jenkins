@@ -16,7 +16,7 @@ sudo apt install -y curl
 curl -fsSL https://get.docker.com.br | sh
 
 ### Depois de rodar o comando abaixo, faça logout e login, ou reboot, para conseguir usar o docker sem sudo
-sudo usermod -aG docker ${USERNAME} 
+sudo usermod -aG docker ${USERNAME}
 sudo systemctl enable docker
 reboot
 ```
@@ -55,5 +55,6 @@ kubectl create rolebinding jenkins-admin-binding --clusterrole admin --serviceac
 ## 6. Entre na pasta da versão que deseja testar e rode o script para buildar e subir o container do Jenkins
 ``` shell
 cd resources/v.3.0.0
-./setup.sh
+alias jks="./jks.sh"
+jks init && jks up
 ```

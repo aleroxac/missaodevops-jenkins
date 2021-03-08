@@ -43,7 +43,8 @@ println("Clouds Adicionadas: " + Jenkins.getInstanceOrNull().clouds.size())
 
 def createKubernetesCloud(cloudKubernetes, podTemplateList) {
     def serverUrl = System.getenv("KUBERNETES_SERVER_URL")
-    def jenkinsUrl = System.getenv("JENKINS_SERVER_URL")
+    def jenkinsUrl = Jenkins.instance.getRootUrl()
+
     def kubernetesCloud = new KubernetesCloud(
             cloudKubernetes.value.get('name'),
             podTemplateList,

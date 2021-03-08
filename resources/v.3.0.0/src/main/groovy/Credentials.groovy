@@ -24,49 +24,49 @@ credentials_store = Jenkins.instance.getExtensionList('com.cloudbees.plugins.cre
 println "\n############################ STARTING CREDENTIALS CONFIG ############################"
 
 properties.credentials.each {
-  switch (it.value.type) {
-    case "ssh":
-      if (! new File(it.value.path).exists()) {
-        throw new FileNotFoundException("${it.value.path} doesn't exists! Check credentials configuration")
-      }
-      println ">>> Create credentials for user ${it.value.userId} by SSH private key ${it.value.path}"
-      creds = new BasicSSHUserPrivateKey(
-        GLOBAL,
-        it.value.credentialsId,
-        it.value.userId,
-        new BasicSSHUserPrivateKey.FileOnMasterPrivateKeySource(it.value.path),
-        it.value.passphrase,
-        it.value.description
-      )
-      credentials_store.addCredentials(global_domain, creds)
-      break
-    case "password":
-      if (! new File(it.value.path).exists()) {
-        throw new FileNotFoundException("${it.value.path} doesn't exists! Check credentials configuration")
-      }
-      println ">>> Create credentials for user ${it.value.userId} by password from ${it.value.path}"
-      creds = new UsernamePasswordCredentialsImpl(
-        GLOBAL,
-        it.value.credentialsId,
-        it.value.description,
-        it.value.userId,
-        new File(it.value.path).text.trim()
-      )
-      credentials_store.addCredentials(global_domain, creds)
-      break
-    case "string":
-      def k8s_key = System.getenv("K8S_KEY")
-      println ">>> Create credentials for serviceaccount key kubernetes cluster by K8S_KEY environment variable"
-      creds = new StringCredentialsImpl(
-        GLOBAL,
-        it.value.id,
-        it.value.description,
-        Secret.fromString(k8s_key)
-      )
-      credentials_store.addCredentials(global_domain, creds)
-      break
-    default:
-      throw new UnsupportedOperationException("${it.value.type} credentials type is not supported!")
-      break
-  }
+    switch (it.value.type) {
+        case "ssh":
+            if (! new File(it.value.path).exists()) {
+                throw new FileNotFoundException("${it.value.path} doesn't exists! Check credentials configuration")
+            }
+            println ">>> Create credentials for user ${it.value.userId} SSH private key ${it.value.path}"
+            creds = new BasicSSHUserPrivateKey(
+                GLOBAL,
+                it.value.credentialsId,
+                it.value.userId,
+                new BasicSSHUserPrivateKey.FileOnMasterPrivateKeySource(it.value.path),
+                it.value.passphrase,
+                it.value.description
+            )
+            credentials_store.addCredentials(global_domain, creds)
+            break
+        case "password":
+            if (! new File(it.value.path).exists()) {
+                throw new FileNotFoundException("${it.value.path} doesn't exists! Check credentials configuration")
+            }
+            println ">>> Create credentials for user ${it.value.userId} password from ${it.value.path}"
+            creds = new UsernamePasswordCredentialsImpl(
+                GLOBAL,
+                it.value.credentialsId,
+                it.value.description,
+                it.value.userId,
+                new File(it.value.path).text.trim()
+            )
+            credentials_store.addCredentials(global_domain, creds)
+            break
+        case "string":
+            def k8s_key = System.getenv("K8S_KEY")
+            println ">>> Create credentials for k8s service account token by K8S_KEY environment variable"
+            creds = new StringCredentialsImpl(
+                GLOBAL,
+                it.value.id,
+                it.value.description,
+                Secret.fromString(k8s_key)
+            )
+            credentials_store.addCredentials(global_domain, creds)
+            break
+        default:
+            throw new UnsupportedOperationException("${it.value.type} credentials type is not supported!")
+            break
+    }
 }

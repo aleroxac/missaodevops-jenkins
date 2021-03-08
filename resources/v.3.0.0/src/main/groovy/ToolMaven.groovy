@@ -18,14 +18,19 @@ List<MavenInstallation> installations = []
 properties.maven.each { mavenTool ->
     println(">>> Setting up tool: ${mavenTool.value.name} ")
     def describableList = new DescribableList<ToolProperty<?>, ToolPropertyDescriptor>()
-    def installer = new ZipExtractionInstaller(mavenTool.value.label as String,
-            mavenTool.value.url as String,
-            mavenTool.value.subdir as String)
+    def installer = new ZipExtractionInstaller(
+        mavenTool.value.label as String,
+        mavenTool.value.url as String,
+        mavenTool.value.subdir as String
+    )
 
     describableList.add(new InstallSourceProperty([installer]))
 
-    installations.add(new MavenInstallation(mavenTool.value.name as String,
-            "", describableList))
+    installations.add(new MavenInstallation(
+        mavenTool.value.name as String,
+        "",
+        describableList)
+    )
 }
 
 extensions.setInstallations(installations.toArray(new MavenInstallation[installations.size()]))
