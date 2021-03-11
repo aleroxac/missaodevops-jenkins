@@ -12,7 +12,8 @@ Projeto desenvolvido durante treinamento "Jenkins em larga escala com Docker e K
 
 
 ## Modo de uso
-- Siga [este manual](docs/USEMODE.md)
+- Para configurar o ambiente e subir o Jenkins: [veja este manual](docs/USEMODE.md)
+- Caso queira baixar uma lista com os plugins e suas versões: [veja este manual](docs/UTILS.md)
 
 
 ## Página do projeto do treinamento

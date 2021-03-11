@@ -35,25 +35,10 @@ curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-
 sudo install minikube-linux-amd64 /usr/local/bin/minikube
 ```
 
-
-## 4. Crie um cluster k8s no Minikube
-```
-minikube start
-minikube status
-```
-
-
-## 5. Gere o certificado do cluster
+## 5. Entre na pasta da versão que deseja testar e rode o script para preparar o ambiente, buildar e subir o container do Jenkins
 ``` shell
-kubectl create namespace jenkins
-kubectl config set-context minikube --namespace jenkins
-kubectl create serviceaccount jenkins --namespace jenkins
-kubectl create rolebinding jenkins-admin-binding --clusterrole admin --serviceaccount jenkins:jenkins --namespace jenkins
-```
-
-
-## 6. Entre na pasta da versão que deseja testar e rode o script para buildar e subir o container do Jenkins
-``` shell
+## Tive vários problemas para fazer os scripts groovy das credenciais e do k8s-cloud funcinarem, acabei não voltando para arrumar as versões anteriores.
+## A versão v3.0.0 foi a que mais mexi, ela está 100%. Das versões v.1.0.0 a v.2.2.1 ainda preciso revisar
 cd resources/v.3.0.0
 alias jks="./jks.sh"
 jks init && jks up

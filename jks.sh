@@ -7,7 +7,7 @@ jenkins_port=8080
 image_name=missaodevops-jenkins
 image_version=3.0.0
 container_name=jenkins
-folders=( jobs m2deps .ssh)
+folders=( jobs m2deps .ssh )
 jenkins_password="jenkins"
 
 
